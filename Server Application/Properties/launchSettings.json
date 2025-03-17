@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Server Application": {
+      "commandName": "Project",
+      "hotReloadEnabled": false
+    }
+  }
+}
