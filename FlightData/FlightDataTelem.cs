@@ -2,18 +2,18 @@
 
 namespace FlightData
 {
-    public class FlightData
+    public class FlightDataTelem
     {
         public DateTime TimeStamp { get; set; }
         
         public float FuelLevel {  get; set; }
 
-        public FlightData() 
+        public FlightDataTelem() 
         {
             TimeStamp = DateTime.Now;
             FuelLevel = 0;
         }
-        public FlightData(DateTime date, float fuel)
+        public FlightDataTelem(DateTime date, float fuel)
         {
             TimeStamp = date;
             FuelLevel = fuel;
@@ -25,23 +25,32 @@ namespace FlightData
     {
         //For encoding into bytes, just utilize built-in GetBytes() command.
 
-        //Converts data stream into string and initializes a FlightData Object.
-        static public FlightData GetFlightData(byte[] bytes)
+        /// <summary>
+        /// Converts byte array into a FlightData Object.
+        /// </summary>
+        /// <param name="bytes">Byte Array to parse</param>
+        /// <param name="Count">Number of Bytes to convert</param>
+        /// <returns>FlightDataTelem Object</returns>
+        static public FlightDataTelem GetFlightData(byte[] bytes, int Count)
         {
-            string data = Encoding.UTF8.GetString(bytes);
+            string data = Encoding.UTF8.GetString(bytes, 0 , Count);
 
-            FlightData flight = GetFlightData(data);
+            FlightDataTelem flight = GetFlightData(data);
             
             return flight;
         }
 
-        //Deserializes the string into a FlightData Object
-        static public FlightData GetFlightData(string dataString)
+        /// <summary>
+        /// Deserializes a given string into a FlightData Object
+        /// </summary>
+        /// <param name="dataString">String to parse</param>
+        /// <returns>FlightDataTelem Object</returns>
+        static public FlightDataTelem GetFlightData(string dataString)
         {
             //Turn the single string into an array of multiple strings.
             //The removeemptyentries array will hopefully remove the trailing last ' ' in the files.
             string[] seperated= dataString.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            FlightData data = new FlightData();
+            FlightDataTelem data = new FlightDataTelem();
 
             if (seperated.Length == 3)
             {
