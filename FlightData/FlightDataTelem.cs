@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Runtime.ConstrainedExecution;
+using System.Text;
 
 namespace FlightData
 {
@@ -52,11 +53,15 @@ namespace FlightData
             string[] seperated= dataString.Split(',', StringSplitOptions.RemoveEmptyEntries);
             FlightDataTelem data = new FlightDataTelem();
 
-            if (seperated.Length == 3)
+            if (seperated.Length == 4)
             {
-                //If there are three seperated data lines, that means this is the initial line of data from the client.
+                //If there are four seperated data lines, that means this is the initial line of data from the client.
                 //It is the starting point and initial fuel levels/date for the rest of that flight.
-                
+
+
+                //Prepare Datetime for Conversion
+                seperated[1] = seperated[1].Replace('_', '/');
+
                 //string converts
                 DateTime flightDate = DateTime.Parse(seperated[1]);
                 float fuelLevel = float.Parse(seperated[2]);
@@ -65,9 +70,12 @@ namespace FlightData
                 data.FuelLevel = fuelLevel;
                 data.TimeStamp = flightDate;                
             }
-            else if (seperated.Length == 2)
+            else if (seperated.Length == 3)
             {
-                //Two data strings indicate this is just a continuing flight data, not the initial flight plan.
+                //Three data strings indicate this is just a continuing flight data, not the initial flight plan.
+                
+                //Prepare Datetime for Conversion
+                seperated[1] = seperated[1].Replace('_', '/');
 
                 //String convert
                 DateTime flightDate = DateTime.Parse(seperated[0]);
