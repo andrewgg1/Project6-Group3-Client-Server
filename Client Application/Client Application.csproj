@@ -9,25 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Data Files\katl-kefd-B737-700.txt" />
-    <None Remove="Data Files\Telem_2023_3_12 14_56_40.txt" />
-    <None Remove="Data Files\Telem_2023_3_12 16_26_4.txt" />
-    <None Remove="Data Files\Telem_czba-cykf-pa28-w2_2023_3_1 12_31_27.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Data Files\katl-kefd-B737-700.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data Files\Telem_2023_3_12 14_56_40.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data Files\Telem_2023_3_12 16_26_4.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data Files\Telem_czba-cykf-pa28-w2_2023_3_1 12_31_27.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <None Update="DataFiles\katl-kefd-B737-700.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\Telem_2023_3_12 14_56_40.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\Telem_2023_3_12 16_26_4.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataFiles\Telem_czba-cykf-pa28-w2_2023_3_1 12_31_27.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
