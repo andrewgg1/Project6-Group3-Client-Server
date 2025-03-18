@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Client Application": {
+      "commandName": "Project",
+      "commandLineArgs": "--connection 127.0.0.1"
+    }
+  }
+}
