@@ -7,14 +7,14 @@ namespace FlightData
     {
         public DateTime TimeStamp { get; set; }
         
-        public float FuelLevel {  get; set; }
+        public double FuelLevel {  get; set; }
 
         public FlightDataTelem() 
         {
             TimeStamp = DateTime.Now;
             FuelLevel = 0;
         }
-        public FlightDataTelem(DateTime date, float fuel)
+        public FlightDataTelem(DateTime date, double fuel)
         {
             TimeStamp = date;
             FuelLevel = fuel;
@@ -64,7 +64,7 @@ namespace FlightData
 
                 //string converts
                 DateTime flightDate = DateTime.Parse(seperated[1]);
-                float fuelLevel = float.Parse(seperated[2]);
+                double fuelLevel = double.Parse(seperated[2]);
 
                 //Update Object
                 data.FuelLevel = fuelLevel;
@@ -79,7 +79,7 @@ namespace FlightData
 
                 //String convert
                 DateTime flightDate = DateTime.Parse(seperated[0]);
-                float fuel = float.Parse(seperated[1]);
+                double fuel = double.Parse(seperated[1]);
 
                 data.FuelLevel = fuel;
                 data.TimeStamp = flightDate;
