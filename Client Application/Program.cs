@@ -1,10 +1,28 @@
-﻿using System.Net;
+﻿using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-//Write the path to the file here according to your system
-string pathToFiles = "";
+// Data files directory and filename
+string dataFilesDir = "DataFiles";
+string dataFileName = "";
 
+// Get random data file
+try
+{
+    // Get all files with a .txt extension and randomly pick one
+    var allFiles = new DirectoryInfo(dataFilesDir).GetFiles("*.*").Where(f => f.Extension.ToLower() == ".txt");
+    dataFileName = allFiles.ElementAt(new Random().Next(0, allFiles.Count())).Name;
+}
+catch(Exception ex)
+{
+    // Could not read file
+    Console.WriteLine(ex.Message);
+    Console.ReadKey();
+    return;
+}
+
+Console.WriteLine($"Using data file: {dataFileName}");
 
 Console.WriteLine("Client Starting...");
 
@@ -25,7 +43,7 @@ await clientConnection.ConnectAsync(ipEndpoint);
 //extract connection stream
 await using NetworkStream stream = clientConnection.GetStream();
 
-StreamReader? FileReader = File.OpenText(pathToFiles);
+StreamReader? FileReader = File.OpenText($"{dataFilesDir}\\{dataFileName}");
 
 if(FileReader != null)
 {
