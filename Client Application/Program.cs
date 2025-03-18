@@ -3,20 +3,56 @@ using System.Net.Sockets;
 using System.Text;
 
 //Write the path to the file here according to your system
-string pathToFiles = "";
+
+string pathToFiles = "./Data Files/Telem_2023_3_12 16_26_4.txt";
+
+Console.WriteLine("Client Starting... \n\n");
+
+IPAddress? Server = null;
+
+if (args.Length > 0)
+{
+    int numberOfArguments = args.Length;
+
+    Console.WriteLine($"{numberOfArguments} Command Line Arguments were passed.\n");
+
+    if (numberOfArguments % 2 != 1)
+    {
+        for (int i = 0; i <= (numberOfArguments/2)-1; i = i + 2)
+        {
+            //DEBUG WRITE LINES
+            //Console.WriteLine($"Option = {args[i]}");
+            //Console.WriteLine($"Argument = {args[i + 1]}");
+
+            if (args[i] == "--connection")
+            {
+                //Convert Commandline to IPAddress
+                Server = IPAddress.Parse(args[i + 1]);
 
 
-Console.WriteLine("Client Starting...");
+                Console.WriteLine($"Client attempting connection to: {args[i+1]}");
+            }
+        }
+    }
+    else
+    {
+        Console.WriteLine("Incorrect number of arguments were passed. Please Rectify Issue and try again.");
+    }
+}
+else
+{
+    Console.WriteLine("No command line argument provided, connecting to 127.0.0.1");
 
-//Initialize the client
-IPAddress Server = IPAddress.Parse("127.0.0.1");
+    //Initialize the client
+    Server = IPAddress.Parse("127.0.0.1");
+}
 
 var ipEndpoint = new IPEndPoint(Server, 53000);
 
 using TcpClient clientConnection = new TcpClient();
 
 //--Flow Control
-    Console.WriteLine("Client Application Ready.\nPress enter to Start.");
+    Console.WriteLine("\n\nClient Application Ready.\nPress enter to Start.");
     Console.ReadLine();
 
 //bind and connect
@@ -55,9 +91,11 @@ else
     Console.WriteLine("File Not Found. Ending Process");
 }
 
-    Console.WriteLine("Client Application Done.\nPress enter to Finish.");
-    Console.ReadLine();
-
 
 clientConnection.Close();
 clientConnection.Dispose();
+
+    Console.WriteLine("\nClient Application Done.\nPress enter to Finish.");
+    Console.ReadLine();
+
+return 0;
