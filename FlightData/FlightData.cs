@@ -25,7 +25,7 @@ namespace FlightData
     {
         //For encoding into bytes, just utilize built-in GetBytes() command.
 
-        //Converts data stream into string and passes to other flightdata funciton.
+        //Converts data stream into string and initializes a FlightData Object.
         static public FlightData GetFlightData(byte[] bytes)
         {
             string data = Encoding.UTF8.GetString(bytes);
