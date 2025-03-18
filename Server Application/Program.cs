@@ -1,5 +1,6 @@
 ﻿//--connection "192.0.123.37" -m "Hello from CommandLine"
 
+using FlightData;
 using Microsoft.VisualBasic.FileIO;
 using System.Net;
 using System.Net.Sockets;
@@ -35,14 +36,14 @@ try
     {
         //This simultaneously writes the recieved message into buffer
         //and also extracts the byte size of the message
-        int bytesRead = await datastream.ReadAsync(buffer);
-        
+        int bytesRead = datastream.Read(buffer);
+
         //Assuming it's just a string, convert from bytes to string.
         //Need to provide bytes read into GetString in case the recieved message is smaller than the total buffer size.
-        var message = Encoding.UTF8.GetString(buffer,0, bytesRead);
+        FlightDataTelem flightData = FlightDataEncoder.GetFlightData(buffer, bytesRead);
         
         //Write the recieved message to console.
-        Console.WriteLine(message);
+        Console.WriteLine($"Flight Fuel Level: {flightData.FuelLevel: .000000} | Timestamp: {flightData.TimeStamp:f}");
     }
 
 }
