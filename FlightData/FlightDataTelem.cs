@@ -75,7 +75,7 @@ namespace FlightData
                 //Three data strings indicate this is just a continuing flight data, not the initial flight plan.
                 
                 //Prepare Datetime for Conversion
-                seperated[1] = seperated[1].Replace('_', '/');
+                seperated[0] = seperated[0].Replace('_', '/');
 
                 //String convert
                 DateTime flightDate = DateTime.Parse(seperated[0]);
