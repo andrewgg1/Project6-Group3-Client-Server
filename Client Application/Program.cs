@@ -5,6 +5,7 @@ using System.Text;
 
 Console.WriteLine("Client Starting... \n");
 IPAddress? Server = null;
+int port = 53000;   //defaults to 53000
 
 if (args.Length > 0)
 {
@@ -15,9 +16,9 @@ if (args.Length > 0)
 
     if (numberOfArguments % 2 != 1)
     {
-        for (int i = 0; i <= (numberOfArguments/2)-1; i = i + 2)
+        for (int i = 0; i <= (numberOfArguments/2); i = i + 2)
         {
-            //DEBUG WRITE LINES
+            ////DEBUG WRITE LINES
             //Console.WriteLine($"Option = {args[i]}");
             //Console.WriteLine($"Argument = {args[i + 1]}");
 
@@ -28,6 +29,14 @@ if (args.Length > 0)
 
 
                 Console.WriteLine($"Client attempting connection to: {args[i+1]}");
+            }
+
+            if (args[i] == "--port")
+            {
+                //Convert to int
+                port = int.Parse(args[i + 1]);
+
+                Console.WriteLine($"Communication on port {port}");
             }
         }
     }
@@ -44,7 +53,7 @@ else
     Server = IPAddress.Parse("127.0.0.1");
 }
 
-var ipEndpoint = new IPEndPoint(Server, 53000);
+var ipEndpoint = new IPEndPoint(Server, port);
 using TcpClient clientConnection = new TcpClient();
 
 // Data files directory and filename
@@ -71,43 +80,49 @@ Console.WriteLine($"\nUsing data file: {dataFileName}");
 //--Flow Control
     Console.WriteLine("\n\nClient Application Ready.\nPress enter to Start.");
     Console.ReadLine();
-
-//bind and connect
-await clientConnection.ConnectAsync(ipEndpoint);
-
-//extract connection stream
-await using NetworkStream stream = clientConnection.GetStream();
-
-StreamReader? FileReader = File.OpenText($"{dataFilesDir}\\{dataFileName}");
-
-if(FileReader != null)
+try
 {
-    for (int i = 0; i <20; i++)
+
+    //bind and connect
+    await clientConnection.ConnectAsync(ipEndpoint);
+
+    //extract connection stream
+    await using NetworkStream stream = clientConnection.GetStream();
+
+    StreamReader? FileReader = File.OpenText($"{dataFilesDir}\\{dataFileName}");
+
+    if(FileReader != null)
     {
-        //Read line from file
-        string rawMessage = FileReader.ReadLine();
-
-        if (rawMessage != null)
+        for (int i = 0; i <20; i++)
         {
-            //convert to a stream of pure bytes.
-            var encodedMessage = Encoding.UTF8.GetBytes(rawMessage);
+            //Read line from file
+            string rawMessage = FileReader.ReadLine();
+
+            if (rawMessage != null)
+            {
+                //convert to a stream of pure bytes.
+                var encodedMessage = Encoding.UTF8.GetBytes(rawMessage);
 
 
-            //call the extracted network stream and send a byte-encoded message.
-            await stream.WriteAsync(encodedMessage);
+                //call the extracted network stream and send a byte-encoded message.
+                await stream.WriteAsync(encodedMessage);
 
-            Console.WriteLine($"Sent: {rawMessage}");
+                Console.WriteLine($"Sent: {rawMessage}");
+            }
+
+            Thread.Sleep(1000); //Stop 1 second
         }
-
-        Thread.Sleep(1000); //Stop 1 second
+        FileReader.Close();
     }
-    FileReader.Close();
+    else
+    {
+        Console.WriteLine("File Not Found. Ending Process");
+    }
 }
-else
+catch (Exception e)
 {
-    Console.WriteLine("File Not Found. Ending Process");
+    Console.WriteLine($"Error encountered: {e.Message}");
 }
-
 
 clientConnection.Close();
 clientConnection.Dispose();
