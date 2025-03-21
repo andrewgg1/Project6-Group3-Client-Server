@@ -5,6 +5,9 @@ namespace FlightData
 {
     public class FlightDataTelem
     {
+        //Not sure if you actually need it
+        public int? FlightID {  get; set; }
+
         public DateTime TimeStamp { get; set; }
         
         public double FuelLevel {  get; set; }
