@@ -1,5 +1,5 @@
 ﻿//--connection "192.0.123.37" -m "Hello from CommandLine"
-
+//SERVER
 using FlightData;
 using Microsoft.VisualBasic.FileIO;
 using System.Net;
