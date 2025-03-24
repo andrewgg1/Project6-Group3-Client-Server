@@ -59,7 +59,7 @@ using TcpClient clientConnection = new TcpClient();
 
 // Data files directory and filename
 string dataFilesDir = "DataFiles";
-string dataFileName = "test.txt";
+string dataFileName = "katl-kefd-B737-700.txt"; //reduced the file to a few lines
 
 // Get random data file
 //try
@@ -79,8 +79,9 @@ string dataFileName = "test.txt";
 Console.WriteLine($"\nUsing data file: {dataFileName}");
 
 //--Flow Control
-    Console.WriteLine("\n\nClient Application Ready.\nPress enter to Start.");
-    Console.ReadLine();
+Console.WriteLine("\n\nClient Application Ready.\nPress enter to Start.");
+Console.ReadLine();
+
 try
 {
 
@@ -94,25 +95,31 @@ try
 
     if(FileReader != null)
     {
-        for (int i = 0; i <20; i++)
+        while(!FileReader.EndOfStream) //checking for EOF
         {
             //Read line from file
             string rawMessage = FileReader.ReadLine();
 
-            if (rawMessage != null)
-            {
-                //convert to a stream of pure bytes.
-                var encodedMessage = Encoding.UTF8.GetBytes(rawMessage);
+            //if (rawMessage != null)
+            //{
+            //convert to a stream of pure bytes.
+            var encodedMessage = Encoding.UTF8.GetBytes(rawMessage);
 
 
-                //call the extracted network stream and send a byte-encoded message.
-                await stream.WriteAsync(encodedMessage);
+            //call the extracted network stream and send a byte-encoded message.
+            await stream.WriteAsync(encodedMessage);
 
-                Console.WriteLine($"Sent: {rawMessage}");
-            }
+            Console.WriteLine($"Sent: {rawMessage}");
+            //}
 
             Thread.Sleep(1000); //Stop 1 second
         }
+        //once EOF is reached
+        string eofMessage = "end\n";
+        var encodedEOFMessage = Encoding.UTF8.GetBytes(eofMessage);
+        await stream.WriteAsync(encodedEOFMessage);
+        Console.WriteLine($"Sent: {eofMessage}");
+
         FileReader.Close();
     }
     else
@@ -128,7 +135,7 @@ catch (Exception e)
 clientConnection.Close();
 clientConnection.Dispose();
 
-    Console.WriteLine("\nClient Application Done.\nPress enter to Finish.");
-    Console.ReadLine();
+Console.WriteLine("\nClient Application Done.\nPress enter to Finish.");
+Console.ReadLine();
 
 return 0;

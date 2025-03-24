@@ -31,20 +31,28 @@ try
 
     //Initialize recieving byte buffer. 1 kb buffer
     var buffer = new byte[1_024];
-    
-    for(int i=0; i<20; i++)
+    string endMessage = ""; 
+    while(endMessage != "end") //check for end message
     {
         //This simultaneously writes the recieved message into buffer
         //and also extracts the byte size of the message
         int bytesRead = datastream.Read(buffer);
 
-        //Assuming it's just a string, convert from bytes to string.
-        //Need to provide bytes read into GetString in case the recieved message is smaller than the total buffer size.
-        FlightDataTelem flightData = FlightDataEncoder.GetFlightData(buffer, bytesRead);
+        //check for EOF
+        endMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+
+        if(endMessage != "end")
+        {
+            //Assuming it's just a string, convert from bytes to string.
+            //Need to provide bytes read into GetString in case the recieved message is smaller than the total buffer size.
+            FlightDataTelem flightData = FlightDataEncoder.GetFlightData(buffer, bytesRead);
+
+            //Write the recieved message to console.
+            Console.WriteLine($"Flight Fuel Level: {flightData.FuelLevel: .000000} | Timestamp: {flightData.TimeStamp:f}");
+        }
         
-        //Write the recieved message to console.
-        Console.WriteLine($"Flight Fuel Level: {flightData.FuelLevel: .000000} | Timestamp: {flightData.TimeStamp:f}");
     }
+    Console.WriteLine("End of transmission");
 
 }
 finally
