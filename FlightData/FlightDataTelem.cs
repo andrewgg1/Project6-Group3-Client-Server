@@ -50,7 +50,7 @@ namespace FlightData
         /// <param name="dataString">String to parse</param>
         /// <returns>FlightDataTelem Object</returns>
         static public FlightDataTelem GetFlightData(string dataString)
-        {                
+        {
             //Turn the single string into an array of multiple strings.
             //The removeemptyentries array will hopefully remove the trailing last ' ' in the files.
             string[] seperated = dataString.Split(',', StringSplitOptions.RemoveEmptyEntries);
@@ -61,6 +61,7 @@ namespace FlightData
                 //If there are four seperated data lines, that means this is the initial line of data from the client.
                 //It is the starting point and initial fuel levels/date for the rest of that flight.
 
+
                 //Prepare Datetime for Conversion
                 seperated[1] = seperated[1].Replace('_', '/');
 
@@ -70,11 +71,12 @@ namespace FlightData
 
                 //Update Object
                 data.FuelLevel = fuelLevel;
-                data.TimeStamp = flightDate;                
+                data.TimeStamp = flightDate;
             }
             else if (seperated.Length == 3)
             {
-                //Three data strings indicate this is just a continuing flight data, not the initial flight plan.                
+                //Three data strings indicate this is just a continuing flight data, not the initial flight plan.
+
                 //Prepare Datetime for Conversion
                 seperated[0] = seperated[0].Replace('_', '/');
 
