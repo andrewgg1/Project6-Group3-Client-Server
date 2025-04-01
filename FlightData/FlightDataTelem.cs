@@ -8,14 +8,14 @@ namespace FlightData
         //Not sure if you actually need it
         public int? FlightID {  get; set; }
 
-        public DateTime TimeStamp { get; set; }
+        public DateTime? TimeStamp { get; set; }
         
-        public double FuelLevel {  get; set; }
+        public double? FuelLevel {  get; set; }
 
         public FlightDataTelem() 
         {
             TimeStamp = DateTime.Now;
-            FuelLevel = 0;
+            FuelLevel = 0;           
         }
         public FlightDataTelem(DateTime date, double fuel)
         {
@@ -53,7 +53,7 @@ namespace FlightData
         {
             //Turn the single string into an array of multiple strings.
             //The removeemptyentries array will hopefully remove the trailing last ' ' in the files.
-            string[] seperated= dataString.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            string[] seperated = dataString.Split(',', StringSplitOptions.RemoveEmptyEntries);
             FlightDataTelem data = new FlightDataTelem();
 
             if (seperated.Length == 4)
@@ -71,12 +71,12 @@ namespace FlightData
 
                 //Update Object
                 data.FuelLevel = fuelLevel;
-                data.TimeStamp = flightDate;                
+                data.TimeStamp = flightDate;
             }
             else if (seperated.Length == 3)
             {
                 //Three data strings indicate this is just a continuing flight data, not the initial flight plan.
-                
+
                 //Prepare Datetime for Conversion
                 seperated[0] = seperated[0].Replace('_', '/');
 

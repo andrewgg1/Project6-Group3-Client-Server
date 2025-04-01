@@ -1,5 +1,5 @@
 ﻿//--connection "192.0.123.37" -m "Hello from CommandLine"
-
+//SERVER
 using FlightData;
 using Microsoft.VisualBasic.FileIO;
 using System.Net;
@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 
 
-Console.WriteLine("loopback Test Starting. \n");
+Console.WriteLine("Awaiting communication with client. \n");
 
 //-----Server
 
@@ -31,21 +31,31 @@ try
 
     //Initialize recieving byte buffer. 1 kb buffer
     var buffer = new byte[1_024];
-    
-    for(int i=0; i<20; i++)
+
+    bool Continue = true;
+    while (Continue) //check for end message
     {
         //This simultaneously writes the recieved message into buffer
         //and also extracts the byte size of the message
-        int bytesRead = datastream.Read(buffer);
+        int bytesRead = await datastream.ReadAsync(buffer);
 
-        //Assuming it's just a string, convert from bytes to string.
-        //Need to provide bytes read into GetString in case the recieved message is smaller than the total buffer size.
-        FlightDataTelem flightData = FlightDataEncoder.GetFlightData(buffer, bytesRead);
-        
-        //Write the recieved message to console.
-        Console.WriteLine($"Flight Fuel Level: {flightData.FuelLevel: .000000} | Timestamp: {flightData.TimeStamp:f}");
+        //check for EOF
+        string endMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+
+        if (endMessage == "end")
+        {
+            Console.WriteLine("End of transmission");
+            Continue = false;
+        }
+        else
+        { //Assuming it's just a string, convert from bytes to string.
+            //Need to provide bytes read into GetString in case the recieved message is smaller than the total buffer size.
+            FlightDataTelem flightData = FlightDataEncoder.GetFlightData(buffer, bytesRead);
+
+            //Write the recieved message to console.
+            Console.WriteLine($"Flight Fuel Level: {flightData.FuelLevel: .000000} | Timestamp: {flightData.TimeStamp:f}");
+        }
     }
-
 }
 finally
 {
