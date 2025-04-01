@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 
 
-Console.WriteLine("loopback Test Starting. \n");
+Console.WriteLine("Awaiting communication with client. \n");
 
 //-----Server
 
@@ -31,7 +31,9 @@ try
 
     //Initialize recieving byte buffer. 1 kb buffer
     var buffer = new byte[1_024];
-    while (true) //check for end message
+
+    bool Continue = true;
+    while (Continue) //check for end message
     {
         //This simultaneously writes the recieved message into buffer
         //and also extracts the byte size of the message
@@ -43,7 +45,7 @@ try
         if (endMessage == "end")
         {
             Console.WriteLine("End of transmission");
-            break;
+            Continue = false;
         }
         else
         { //Assuming it's just a string, convert from bytes to string.
