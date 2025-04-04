@@ -18,49 +18,11 @@ IPEndPoint acceptIP = new IPEndPoint(IPAddress.Any, 53000);
 TcpListener server =new(acceptIP);
 
 //Try listening for a conection.
-try
-{
-    //This is the server's logic.
-    server.Start();
+//This is the server's logic.
+server.Start();
 
-    //This will create a client for the server to use to communicate with a connected client.
-    using TcpClient handler = await server.AcceptTcpClientAsync();
-        
-    //This async task will wait for the connected client and extract it's network stream
-    await using NetworkStream datastream = handler.GetStream();
-
-    //Initialize recieving byte buffer. 1 kb buffer
-    var buffer = new byte[1_024];
-
-    bool Continue = true;
-    while (Continue) //check for end message
-    {
-        //This simultaneously writes the recieved message into buffer
-        //and also extracts the byte size of the message
-        int bytesRead = await datastream.ReadAsync(buffer);
-
-        //check for EOF
-        string endMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
-
-        if (endMessage == "end")
-        {
-            Console.WriteLine("End of transmission");
-            Continue = false;
-        }
-        else
-        { //Assuming it's just a string, convert from bytes to string.
-            //Need to provide bytes read into GetString in case the recieved message is smaller than the total buffer size.
-            FlightDataTelem flightData = FlightDataEncoder.GetFlightData(buffer, bytesRead);
-
-            //Write the recieved message to console.
-            Console.WriteLine($"Flight Fuel Level: {flightData.FuelLevel: .000000} | Timestamp: {flightData.TimeStamp:f}");
-        }
-    }
-}
-finally
-{
-    server.Stop();
-}
+TCPFlightConnection flightConnection = new TCPFlightConnection();
+flightConnection.ServerLogic(server);
 
 server.Dispose();
 
