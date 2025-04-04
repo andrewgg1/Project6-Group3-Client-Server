@@ -21,9 +21,13 @@ TcpListener server =new(acceptIP);
 //This is the server's logic.
 server.Start();
 
-TCPFlightConnection flightConnection = new TCPFlightConnection();
-await flightConnection.ServerLogic(server);
+await new TCPFlightConnection().ServerLogic(server);
 
 server.Dispose();
+
+
+/// new implementation - untested
+/// await new TCPFlightConnection().ServerLogicAsync(53000);
+
 
 return 0;
