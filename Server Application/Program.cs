@@ -80,31 +80,38 @@ try
         }
         else
         {
-            //Assuming it's just a string, convert from bytes to string.
-            //Need to provide bytes read into GetString in case the recieved message is smaller than the total buffer size.
-            FlightDataTelem flightData = FlightDataEncoder.GetFlightData(buffer, bytesRead);
-
-            //add telemetry to session's list
-            flightDataList.Add(flightData);
-
-            //calculate current fuel consumption if we have more than one reading
-            if (flightDataList.Count > 1)
+            try
             {
-                var first = flightDataList.First();
-                var last = flightDataList.Last();
+                //try to parse the incoming string as flight telemetry
+                FlightDataTelem flightData = FlightDataEncoder.GetFlightData(incomingString);
 
-                TimeSpan duration = last.TimeStamp.Value - first.TimeStamp.Value;
-                double fuelUsed = first.FuelLevel.Value - last.FuelLevel.Value;
-                double hours = duration.TotalHours;
+                //add telemetry to session's list
+                flightDataList.Add(flightData);
 
-                double currentRate = fuelUsed / hours;
+                //calculate current fuel consumption if enough data
+                if (flightDataList.Count > 1)
+                {
+                    var first = flightDataList.First();
+                    var last = flightDataList.Last();
 
-                Console.WriteLine($"Current Fuel Consumption for {currentClientID}: {currentRate:F4} gallons/hour");
+                    TimeSpan duration = last.TimeStamp.Value - first.TimeStamp.Value;
+                    double fuelUsed = first.FuelLevel.Value - last.FuelLevel.Value;
+                    double hours = duration.TotalHours;
+
+                    double currentRate = fuelUsed / hours;
+
+                    Console.WriteLine($"Current Fuel Consumption for {currentClientID}: {currentRate:F4} gallons/hour");
+                }
+                else
+                {
+                    //write the received message to console.
+                    Console.WriteLine($"Flight Fuel Level: {flightData.FuelLevel: .000000} | Timestamp: {flightData.TimeStamp:f}");
+                }
             }
-            else
+            catch (FormatException ex)
             {
-                //Write the received message to console.
-                Console.WriteLine($"Flight Fuel Level: {flightData.FuelLevel: .000000} | Timestamp: {flightData.TimeStamp:f}");
+                //if the incoming line is empty or invalid, skip it
+                Console.WriteLine($"[Warning] Skipped invalid or blank telemetry line: \"{incomingString}\"");
             }
         }
     }
