@@ -22,7 +22,7 @@ TcpListener server =new(acceptIP);
 server.Start();
 
 TCPFlightConnection flightConnection = new TCPFlightConnection();
-flightConnection.ServerLogic(server);
+await flightConnection.ServerLogic(server);
 
 server.Dispose();
 
