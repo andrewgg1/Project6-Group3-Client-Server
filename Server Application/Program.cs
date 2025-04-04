@@ -2,41 +2,24 @@
 //SERVER
 using FlightData;
 using Microsoft.VisualBasic.FileIO;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-
-//public class Flag
-//{
-//    public bool Continue {  get; set; }
-
-//    public Flag()
-//    {
-//        Continue = true;
-//    }
-
-//    public void Stop()
-//    {
-//        if (Console.ReadKey() != null)
-//        {
-//            Continue = false;
-//        }
-//        return;
-//    }
-//}
 
 public class TCPFlightConnection
 {
     public TcpClient handler {  get; set; }
 
-    public string? FlightId { get; set; }
+    public string? currentClientID { get; set; }
 
-
+    public List<FlightDataTelem> flightDataList { get; set; } //store all data points for fuel calculation
 
     public TCPFlightConnection(TcpClient tcp)
     {
         handler = tcp;
-        FlightId = null;
+        currentClientID = null;
+        flightDataList = new List<FlightDataTelem>();
     }
 
     //new unlimited client connection changes
@@ -119,6 +102,7 @@ public class TCPFlightConnection
         var buffer = new byte[1_024];
 
         bool keepStreaming = true;
+       
         while (keepStreaming) //check for end message
         {
             //This simultaneously writes the recieved message into buffer
@@ -127,24 +111,78 @@ public class TCPFlightConnection
 
             //check for EOF
             string endMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+            
+            //handle special id message from client
+            if (endMessage.StartsWith("id,"))
+            {
+                currentClientID = endMessage.Split(',')[1];
+                Console.WriteLine($"Client connected with ID: {currentClientID}");
+                continue;
+            }
 
             if (endMessage == "end")
             {
                 Console.WriteLine("End of transmission");
                 keepStreaming = false;
-            }
-            else
-            { //Assuming it's just a string, convert from bytes to string.
-              //Need to provide bytes read into GetString in case the recieved message is smaller than the total buffer size.
-                FlightDataTelem flightData = FlightDataEncoder.GetFlightData(buffer, bytesRead);
+                
+                //calculate and save final average consumption
+                if (flightDataList.Count > 1)
+                {
+                    var first = flightDataList.First();
+                    var last = flightDataList.Last();
 
-                //Write the recieved message to console.
-                Console.WriteLine($"Flight Fuel Level: {flightData.FuelLevel: .000000} | Timestamp: {flightData.TimeStamp:f}");
+                    TimeSpan duration = last.TimeStamp.Value - first.TimeStamp.Value;
+                    double fuelUsed = first.FuelLevel.Value - last.FuelLevel.Value;
+                    double hours = duration.TotalHours;
+                    double avgConsumption = fuelUsed / hours;
+
+                    string outputPath = $"flight_results_{currentClientID}.txt";
+                    File.WriteAllText(outputPath, $"Client ID: {currentClientID}\nFinal Average Fuel Consumption: {avgConsumption:F4} gallons/hour \n");
+
+                    Console.WriteLine($"Final Average Fuel Consumption stored for {currentClientID}: {avgConsumption:F4} gallons/hour \n");
+                }
+            }
+            
+            else
+            {
+                try
+                {
+                    //Assuming it's just a string, convert from bytes to string.
+                    //Need to provide bytes read into GetString in case the recieved message is smaller than the total buffer size.
+                    FlightDataTelem flightData = FlightDataEncoder.GetFlightData(buffer, bytesRead);
+
+                    //add telemetry to session's list
+                    flightDataList.Add(flightData);
+                
+
+                    //calculate current fuel consumption if enough data
+                    if (flightDataList.Count > 1)
+                    {
+                        var first = flightDataList.First();
+                        var last = flightDataList.Last();
+
+                        TimeSpan duration = last.TimeStamp.Value - first.TimeStamp.Value;
+                        double fuelUsed = first.FuelLevel.Value - last.FuelLevel.Value;
+                        double hours = duration.TotalHours;
+
+                        double currentRate = fuelUsed / hours;
+
+                        Console.WriteLine($"Current Fuel Consumption for {currentClientID}: {currentRate:F4} gallons/hour \n");
+                    }
+                    else
+                    {
+                        //write the received message to console.
+                        Console.WriteLine($"Flight Fuel Level: {flightData.FuelLevel: .000000} | Timestamp: {flightData.TimeStamp:f} \\n");
+                    }
+                }
+                catch (FormatException ex)
+                {
+                //if the incoming line is empty or invalid, skip it
+                Console.WriteLine($"[Warning] Skipped invalid or blank telemetry line: \"{endMessage}\" \n");
+                }
             }
         }
-    }
-
-    
+    }  
 
     static public int Main()
     {
