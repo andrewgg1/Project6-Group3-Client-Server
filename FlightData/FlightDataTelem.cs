@@ -5,8 +5,7 @@ using System.Runtime.ConstrainedExecution;
 using System.Text;
 
 namespace FlightData
-{
-    
+{    
     public class FlightDataTelem
     {
         //Not sure if you actually need it
