@@ -8,6 +8,9 @@ Console.WriteLine("Client Starting... \n");
 IPAddress? Server = null;
 int port = 53000;   //defaults to 53000
 
+//generate unique client ID using GUID for this session
+string clientID = Guid.NewGuid().ToString();
+
 if (args.Length > 0)
 {
     int numberOfArguments = args.Length;
@@ -91,6 +94,12 @@ try
     //extract connection stream
     await using NetworkStream stream = clientConnection.GetStream();
 
+    //send client ID to server at the start of a session
+    var encodedClientID = Encoding.UTF8.GetBytes($"id,{clientID}\n");
+    await stream.WriteAsync(encodedClientID);
+    Console.WriteLine($"Sent Client ID: {clientID}");
+
+
     StreamReader? FileReader = File.OpenText($"{dataFilesDir}\\{dataFileName}");
 
     if(FileReader != null)
@@ -100,17 +109,17 @@ try
             //Read line from file
             string rawMessage = FileReader.ReadLine();
 
-            //if (rawMessage != null)
-            //{
-            //convert to a stream of pure bytes.
-            var encodedMessage = Encoding.UTF8.GetBytes(rawMessage);
+            if (rawMessage != null && rawMessage != " ")
+            {
+                //convert to a stream of pure bytes.
+                var encodedMessage = Encoding.UTF8.GetBytes(rawMessage);
 
 
             //call the extracted network stream and send a byte-encoded message.
             await stream.WriteAsync(encodedMessage);
 
             Console.WriteLine($"Sent: {rawMessage}");
-            //}
+            }
 
             Thread.Sleep(1000); //Stop 1 second
         }
