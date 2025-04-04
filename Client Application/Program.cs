@@ -100,17 +100,17 @@ try
             //Read line from file
             string rawMessage = FileReader.ReadLine();
 
-            //if (rawMessage != null)
-            //{
-            //convert to a stream of pure bytes.
-            var encodedMessage = Encoding.UTF8.GetBytes(rawMessage);
+            if (rawMessage != null && rawMessage != " ")
+            {
+                //convert to a stream of pure bytes.
+                var encodedMessage = Encoding.UTF8.GetBytes(rawMessage);
 
 
             //call the extracted network stream and send a byte-encoded message.
             await stream.WriteAsync(encodedMessage);
 
             Console.WriteLine($"Sent: {rawMessage}");
-            //}
+            }
 
             Thread.Sleep(1000); //Stop 1 second
         }
