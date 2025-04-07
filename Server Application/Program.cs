@@ -236,7 +236,7 @@ public class TCPFlightConnection
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Client disconnected");
+            Console.WriteLine($"Client disconnected. Message: {ex.Message}");
         }
     }
 
