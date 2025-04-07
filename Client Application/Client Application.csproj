@@ -21,6 +21,9 @@
     <None Update="DataFiles\Telem_czba-cykf-pa28-w2_2023_3_1 12_31_27.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="DataFiles\TestFile.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

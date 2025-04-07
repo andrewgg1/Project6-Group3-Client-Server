@@ -99,6 +99,7 @@ try
     await stream.WriteAsync(encodedClientID);
     Console.WriteLine($"Sent Client ID: {clientID}");
 
+    byte[] buffer = new byte[1];
 
     StreamReader? FileReader = File.OpenText($"{dataFilesDir}\\{dataFileName}");
 
@@ -121,7 +122,8 @@ try
             Console.WriteLine($"Sent: {rawMessage}");
             }
 
-            Thread.Sleep(1000); //Stop 1 second
+            stream.Read(buffer, 0, 1);
+
         }
         //once EOF is reached
         string eofMessage = "end\n";

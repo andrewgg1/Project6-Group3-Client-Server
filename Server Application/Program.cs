@@ -312,10 +312,10 @@ public class TCPFlightConnection
                 //If all connections are Dead, no more messages are being recieved.
                 if (threads.All(t => t.ThreadState == ThreadState.Stopped))
                 {
-                    listener.flag = false;
-                    Console.WriteLine("No TCP connection was made after alloted time. Stopping Server.");
-                    Listener.Interrupt();
-                    threads.ForEach(t => t.Interrupt());
+                    //listener.flag = false;
+                    //Console.WriteLine("No TCP connection was made after alloted time. Stopping Server.");
+                    //Listener.Interrupt();
+                    //threads.ForEach(t => t.Interrupt());
                 }
             }
 

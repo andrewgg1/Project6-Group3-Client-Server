@@ -1,7 +1,8 @@
 {
   "profiles": {
     "Client Application": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "--connection 10.144.124.55 -port 53000"
     }
   }
 }
