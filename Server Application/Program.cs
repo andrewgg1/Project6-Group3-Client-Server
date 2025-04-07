@@ -15,6 +15,10 @@ public class TCPFlightConnection
 
     public List<FlightDataTelem> flightDataList { get; set; } //store all data points for fuel calculation
 
+    ~TCPFlightConnection() {
+        handler.Dispose();
+    }
+
     private DateTime lastCalcTime; //track last time avg was computed
 
     public TCPFlightConnection(TcpClient tcp)
@@ -94,6 +98,8 @@ public class TCPFlightConnection
         }
     }
 
+    
+
     //regular server logic
     public async void ServerLogic()
     {
@@ -110,6 +116,7 @@ public class TCPFlightConnection
             //This simultaneously writes the recieved message into buffer
             //and also extracts the byte size of the message
             int bytesRead = await datastream.ReadAsync(buffer);
+            
 
             //check for EOF
             string endMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
@@ -138,7 +145,7 @@ public class TCPFlightConnection
                 continue;
             }
 
-            if (endMessage == "end")
+            if (endMessage == "end" || endMessage =="")
             {
                 Console.WriteLine("End of transmission");
                 keepStreaming = false;
@@ -166,7 +173,6 @@ public class TCPFlightConnection
                     Console.WriteLine($"Final Average Fuel Consumption stored for {currentClientID}: {avgConsumption:F4} gallons/hour \n");
                 }
             }
-            
             else
             {
                 try
@@ -224,47 +230,90 @@ public class TCPFlightConnection
                 }
             }
         }
-    }
 
-                    
-
-
-    static public int Main()
-    {
-        Console.WriteLine("Awaiting communication with client. \n");
-
-        //-----Server
-
-        //Specify the IPEndpoint we are allowing to connect | IpAddress, port
-        IPEndPoint acceptIP = new IPEndPoint(IPAddress.Any, 53000);
     
-        //init the listener
-        TcpListener server =new(acceptIP);
-
-        //Try listening for a conection.
-        //This is the server's logic.
-        server.Start();
-
-        //Flag contin = new Flag();
-        //Thread Interrupt = new(new ThreadStart(contin.Stop)); 
-
-        while (true)
-        {
-            //This will create a client for the server to use to communicate with a connected client.
-            TcpClient connHandler = new TcpClient();
-            connHandler = server.AcceptTcpClient();
-
-            //Create TcpObject
-            TCPFlightConnection connection = new TCPFlightConnection(connHandler);
-
-            //Create a thread to run internal server logic and perform communications.
-            Thread connThread = new(new ThreadStart(connection.ServerLogic));
-            connThread.Start();
-        }
-
-        server.Dispose();
-
-        return 0;
     }
 }
 
+public class Listener
+{
+    public List<Thread> threads { get; set; }
+    public bool flag { get; set; }
+    
+    public Listener(List<Thread> List, bool state)
+    {
+        threads = List;
+        flag = state;
+    }
+    //Listener Thread
+    public void ListenerLogic()
+    {
+        //Specify the IPEndpoint we are allowing to connect | IpAddress, port
+        IPEndPoint acceptIP = new IPEndPoint(IPAddress.Any, 53000);
+
+        //init the listener
+        TcpListener server = new(acceptIP);
+
+        try
+        {
+            //Try listening for a conection.    
+            server.Start();
+
+            while (flag)
+            {
+                //This will create a client for the server to use to communicate with a connected client.
+                TcpClient connHandler = new TcpClient();
+                connHandler = server.AcceptTcpClient();
+
+
+                //Create TcpObject
+                TCPFlightConnection connection = new TCPFlightConnection(connHandler);
+
+                //Create a thread to run internal server logic and perform communications.
+                Thread connThread = new Thread(connection.ServerLogic);
+                connThread.IsBackground = true;
+                connThread.Start();
+                threads.Add(connThread);
+            }
+
+            server.Dispose();
+        }
+        catch (ThreadInterruptedException e){ 
+            server.Dispose();
+        }
+    }
+}
+public class Server
+{
+    public static int Main()
+    {
+        Console.WriteLine("Awaiting communication with client. \n");
+
+        //Initalize Needed Data Trackers.
+        List<Thread> threads = new List<Thread>();
+        Listener listener = new Listener(threads, true);
+
+        //Start Listener
+        Thread Listener = new Thread(listener.ListenerLogic);
+        Listener.IsBackground = true;
+        Listener.Start();
+
+        while (listener.flag)
+        {
+            //Measured in milliseconds, Sleeps for 1 minute
+            Thread.Sleep(1000 * 60);
+            
+            //If all connections are Dead, no more messages are being recieved.
+            if (threads.All(t => t.ThreadState == ThreadState.Stopped))
+            {
+                listener.flag = false;
+                Console.WriteLine("No TCP connection was made after alloted time. Stopping Server.");
+                Listener.Interrupt();
+                threads.ForEach(t => t.Interrupt());
+            }
+        }
+
+        //Safe 
+        return 0;
+    }
+}

@@ -41,10 +41,15 @@ namespace FlightData
         static public FlightDataTelem GetFlightData(byte[] bytes, int Count)
         {
             string data = Encoding.UTF8.GetString(bytes, 0 , Count);
-
-            FlightDataTelem flight = GetFlightData(data);
-            
-            return flight;
+            try
+            {
+                FlightDataTelem flight = GetFlightData(data);
+                return flight;
+            }
+            catch(Exception e)
+            {
+                throw e;
+            }
         }
 
         /// <summary>
