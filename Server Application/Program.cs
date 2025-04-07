@@ -15,12 +15,11 @@ public class TCPFlightConnection
 
     public List<FlightDataTelem> flightDataList { get; set; } //store all data points for fuel calculation
 
+    private DateTime lastCalcTime; //track last time avg was computed
     ~TCPFlightConnection()
     {
         handler.Dispose();
     }
-
-    private DateTime lastCalcTime; //track last time avg was computed
 
     public TCPFlightConnection(TcpClient tcp)
     {
@@ -39,7 +38,7 @@ public class TCPFlightConnection
 
             //Initialize recieving byte buffer. 1 kb buffer
             var buffer = new byte[1_024];
-            var next = new byte[1] { 1};
+            var next = new byte[1] {1};
 
             bool keepStreaming = true;
 
@@ -78,7 +77,7 @@ public class TCPFlightConnection
                     continue;
                 }
 
-                if (endMessage == "end" || endMessage == "")
+                if (endMessage == "end")
                 {
                     Console.WriteLine("End of transmission");
                     keepStreaming = false;
@@ -104,7 +103,6 @@ public class TCPFlightConnection
                         }
 
                         Console.WriteLine($"Final Average Fuel Consumption stored for {currentClientID}: {avgConsumption:F4} gallons/hour \n");
-                        datastream.Write(next, 0, 1);
                     }
                 }
                 else
@@ -164,14 +162,15 @@ public class TCPFlightConnection
                         //if the incoming line is empty or invalid, skip it
                         Console.WriteLine($"[Warning] Skipped invalid or blank telemetry line: \"{endMessage}\" \n");
                     }
-                }
                 datastream.Write(next, 0, 1);
+                }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Client disconnected");
+            Console.WriteLine($"Client disconnected with message:\n {ex.Message}");
         }
+        handler.Dispose();
     }
 
     public class Listener
