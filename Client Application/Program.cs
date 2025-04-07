@@ -82,8 +82,8 @@ catch (Exception ex)
 Console.WriteLine($"\nUsing data file: {dataFileName}");
 
 //--Flow Control
-Console.WriteLine("\n\nClient Application Ready.\nPress enter to Start.");
-Console.ReadLine();
+//Console.WriteLine("\n\nClient Application Ready.\nPress enter to Start.");
+//Console.ReadLine();
 
 try
 {
