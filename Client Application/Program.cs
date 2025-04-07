@@ -120,9 +120,9 @@ try
             await stream.WriteAsync(encodedMessage);
 
             Console.WriteLine($"Sent: {rawMessage}");
+            stream.Read(buffer, 0, 1);
             }
 
-            stream.Read(buffer, 0, 1);
 
         }
         //once EOF is reached
