@@ -39,6 +39,7 @@ public class TCPFlightConnection
 
             //Initialize recieving byte buffer. 1 kb buffer
             var buffer = new byte[1_024];
+            var next = new byte[1] { 1};
 
             bool keepStreaming = true;
 
@@ -73,6 +74,7 @@ public class TCPFlightConnection
                     Console.WriteLine($"Client connected with ID: {currentClientID}");
 
                     lastCalcTime = DateTime.Now;
+                    datastream.Write(next, 0, 1);
                     continue;
                 }
 
@@ -102,6 +104,7 @@ public class TCPFlightConnection
                         }
 
                         Console.WriteLine($"Final Average Fuel Consumption stored for {currentClientID}: {avgConsumption:F4} gallons/hour \n");
+                        datastream.Write(next, 0, 1);
                     }
                 }
                 else
@@ -153,13 +156,16 @@ public class TCPFlightConnection
                             // or skip printing altogether. For demonstration:
                             Console.WriteLine($"[Received Telem for {currentClientID}] Fuel: {flightData.FuelLevel}, Time: {flightData.TimeStamp}");
                         }
+
                     }
                     catch (FormatException ex)
                     {
+                        datastream.Write(next, 0, 1);
                         //if the incoming line is empty or invalid, skip it
                         Console.WriteLine($"[Warning] Skipped invalid or blank telemetry line: \"{endMessage}\" \n");
                     }
                 }
+                datastream.Write(next, 0, 1);
             }
         }
         catch (Exception ex)
@@ -204,7 +210,6 @@ public class TCPFlightConnection
 
                     //Create a thread to run internal server logic and perform communications.
                     Thread connThread = new Thread(connection.ServerLogic);
-                    connThread.IsBackground = true;
                     connThread.Start();
                     threads.Add(connThread);
                 }
@@ -234,17 +239,17 @@ public class TCPFlightConnection
 
             while (listener.flag)
             {
-                //Measured in milliseconds, Sleeps for 1 minute
-                Thread.Sleep(1000 * 60);
+                ////Measured in milliseconds, Sleeps for 1 minute
+                //Thread.Sleep(1000 * 10);
 
-                //If all connections are Dead, no more messages are being recieved.
-                if (threads.All(t => t.ThreadState == ThreadState.Stopped))
-                {
-                    //listener.flag = false;
-                    //Console.WriteLine("No TCP connection was made after alloted time. Stopping Server.");
-                    //Listener.Interrupt();
-                    //threads.ForEach(t => t.Interrupt());
-                }
+                ////If all connections are Dead, no more messages are being recieved.
+                //if (threads.All(t => t.ThreadState == ThreadState.Stopped))
+                //{
+                //    //listener.flag = false;
+                //    //Console.WriteLine("No TCP connection was made after alloted time. Stopping Server.");
+                //    //Listener.Interrupt();
+                //    //threads.ForEach(t => t.Interrupt());
+                //}
             }
 
             //Safe 

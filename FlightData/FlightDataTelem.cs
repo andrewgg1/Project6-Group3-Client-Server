@@ -95,6 +95,12 @@ namespace FlightData
                 data.FuelLevel = fuel;
                 data.TimeStamp = flightDate;
             }
+            else if (seperated.Length == 1)
+            {
+                //The last message is blank.
+                data.FuelLevel = 0;
+                data.TimeStamp = DateTime.Now;
+            }
             else
             {
                 throw new Exception("Could not Extract Data");

@@ -62,22 +62,22 @@ using TcpClient clientConnection = new TcpClient();
 
 // Data files directory and filename
 string dataFilesDir = "DataFiles";
-string dataFileName = "";
+string dataFileName = "TestFile.txt";
 
 // Get random data file
-try
-{
-    // Get all files with a .txt extension and randomly pick one
-    var allFiles = new DirectoryInfo(dataFilesDir).GetFiles("*.*").Where(f => f.Extension.ToLower() == ".txt");
-    dataFileName = allFiles.ElementAt(new Random().Next(0, allFiles.Count())).Name;
-}
-catch (Exception ex)
-{
-    // Could not read file
-    Console.WriteLine(ex.Message);
-    Console.ReadKey();
-    return -1;
-}
+//try
+//{
+//    // Get all files with a .txt extension and randomly pick one
+//    var allFiles = new DirectoryInfo(dataFilesDir).GetFiles("*.*").Where(f => f.Extension.ToLower() == ".txt");
+//    dataFileName = allFiles.ElementAt(new Random().Next(0, allFiles.Count())).Name;
+//}
+//catch (Exception ex)
+//{
+//    // Could not read file
+//    Console.WriteLine(ex.Message);
+//    Console.ReadKey();
+//    return -1;
+//}
 
 Console.WriteLine($"\nUsing data file: {dataFileName}");
 
