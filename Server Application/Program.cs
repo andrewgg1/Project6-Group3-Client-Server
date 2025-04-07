@@ -15,6 +15,8 @@ public class TCPFlightConnection
 
     public List<FlightDataTelem> flightDataList { get; set; } //store all data points for fuel calculation
 
+    private DateTime lastCalcTime; //track last time avg was computed
+
     public TCPFlightConnection(TcpClient tcp)
     {
         handler = tcp;
@@ -111,12 +113,28 @@ public class TCPFlightConnection
 
             //check for EOF
             string endMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
-            
+
             //handle special id message from client
             if (endMessage.StartsWith("id,"))
             {
-                currentClientID = endMessage.Split(',')[1];
+                //split on just the first comma so we only get the part after id,
+                var parts = endMessage.Split(',', 2);
+                var rawId = parts[1];
+
+                //find if there's an embedded newline. If so, remove everything after it
+                var newlineIndex = rawId.IndexOf('\n');
+                if (newlineIndex >= 0)
+                {
+                    rawId = rawId.Substring(0, newlineIndex);
+                }
+
+                //remove \r as well and trim spaces
+                rawId = rawId.Replace("\r", "").Trim();
+
+                currentClientID = rawId;
                 Console.WriteLine($"Client connected with ID: {currentClientID}");
+
+                lastCalcTime = DateTime.Now;
                 continue;
             }
 
@@ -136,8 +154,14 @@ public class TCPFlightConnection
                     double hours = duration.TotalHours;
                     double avgConsumption = fuelUsed / hours;
 
+                    //write final avg to final
                     string outputPath = $"flight_results_{currentClientID}.txt";
-                    File.WriteAllText(outputPath, $"Client ID: {currentClientID}\nFinal Average Fuel Consumption: {avgConsumption:F4} gallons/hour \n");
+                    using (StreamWriter writer = new StreamWriter(outputPath, append: true))
+                    {
+                        writer.WriteLine("------------------------------------------");
+                        writer.WriteLine($"Final Average Fuel Consumption for {currentClientID}: {avgConsumption:F4} gallons/hour");
+                        writer.WriteLine($"Timestamp: {DateTime.Now}");
+                    }
 
                     Console.WriteLine($"Final Average Fuel Consumption stored for {currentClientID}: {avgConsumption:F4} gallons/hour \n");
                 }
@@ -154,35 +178,56 @@ public class TCPFlightConnection
                     //add telemetry to session's list
                     flightDataList.Add(flightData);
                 
-
-                    //calculate current fuel consumption if enough data
-                    if (flightDataList.Count > 1)
+                    //only compute & log average if 5 mins has passed
+                    if ((DateTime.Now - lastCalcTime).TotalMinutes >= 5.0)
                     {
-                        var first = flightDataList.First();
-                        var last = flightDataList.Last();
+                        //calculate current fuel consumption if enough data
+                        if (flightDataList.Count > 1)
+                        {
+                            var first = flightDataList.First();
+                            var last = flightDataList.Last();
 
-                        TimeSpan duration = last.TimeStamp.Value - first.TimeStamp.Value;
-                        double fuelUsed = first.FuelLevel.Value - last.FuelLevel.Value;
-                        double hours = duration.TotalHours;
+                            TimeSpan duration = last.TimeStamp.Value - first.TimeStamp.Value;
+                            double fuelUsed = first.FuelLevel.Value - last.FuelLevel.Value;
+                            double hours = duration.TotalHours;
 
-                        double currentRate = fuelUsed / hours;
+                            double currentRate = fuelUsed / hours;
 
-                        Console.WriteLine($"Current Fuel Consumption for {currentClientID}: {currentRate:F4} gallons/hour \n");
+                            Console.WriteLine($"Current Fuel Consumption for {currentClientID}: {currentRate:F4} gallons/hour \n");
+                            // Append partial average to file
+                            string outputPath = $"flight_results_{currentClientID}.txt";
+                            using (StreamWriter writer = new StreamWriter(outputPath, append: true))
+                            {
+                                writer.WriteLine($"Partial Average @ {DateTime.Now}: {currentRate:F4} gallons/hour");
+                            }
+                        }
+                        else
+                        {
+                            // if only 1 data point, just note that we can't compute yet
+                            Console.WriteLine($"(Partial Calc) Only 1 data point so far for {currentClientID}. \n");
+                        }
+
+                        // reset the lastCalcTime for the next 5-minute interval
+                        lastCalcTime = DateTime.Now;
                     }
                     else
                     {
-                        //write the received message to console.
-                        Console.WriteLine($"Flight Fuel Level: {flightData.FuelLevel: .000000} | Timestamp: {flightData.TimeStamp:f} \\n");
+                        // If less than 5 real-time minutes, just print the newly received data once if you want
+                        // or skip printing altogether. For demonstration:
+                        Console.WriteLine($"[Received Telem for {currentClientID}] Fuel: {flightData.FuelLevel}, Time: {flightData.TimeStamp}");
                     }
                 }
                 catch (FormatException ex)
                 {
-                //if the incoming line is empty or invalid, skip it
-                Console.WriteLine($"[Warning] Skipped invalid or blank telemetry line: \"{endMessage}\" \n");
+                    //if the incoming line is empty or invalid, skip it
+                    Console.WriteLine($"[Warning] Skipped invalid or blank telemetry line: \"{endMessage}\" \n");
                 }
             }
         }
-    }  
+    }
+
+                    
+
 
     static public int Main()
     {
