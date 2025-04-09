@@ -117,9 +117,10 @@ try
 
 
             //call the extracted network stream and send a byte-encoded message.
-            await stream.WriteAsync(encodedMessage);
+            stream.Write(encodedMessage);
 
             Console.WriteLine($"Sent: {rawMessage}");
+
             stream.Read(buffer, 0, 1);
             }
 

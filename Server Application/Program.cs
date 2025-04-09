@@ -28,12 +28,12 @@ public class TCPFlightConnection
     }
     
     //regular server logic
-    public async void ServerLogic()
+    public void ServerLogic()
     {
         try
         {
             //This async task will wait for the connected client and extract it's network stream
-            await using NetworkStream datastream = handler.GetStream();
+            using NetworkStream datastream = handler.GetStream();
 
             //Initialize recieving byte buffer. 1 kb buffer
             var buffer = new byte[1_024];
@@ -45,7 +45,7 @@ public class TCPFlightConnection
             {
                 //This simultaneously writes the recieved message into buffer
                 //and also extracts the byte size of the message
-                int bytesRead = await datastream.ReadAsync(buffer);
+                int bytesRead = datastream.Read(buffer);
 
 
                 //check for EOF
@@ -167,11 +167,11 @@ public class TCPFlightConnection
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Client disconnected with message:\n {ex.Message}");
+            Console.WriteLine($"Client [{currentClientID}] disconnected with message:\n {ex.Message}");
         }
-        handler.Dispose();
     }
 
+}
     public class Listener
     {
         public List<Thread> threads { get; set; }
@@ -233,7 +233,8 @@ public class TCPFlightConnection
         int ServerTimeOut = 5; //Measured in Minutes
 
         //Prep Results File Directory
-        if (!Directory.Exists(".\\ResultsFiles")){
+        if (!Directory.Exists(".\\ResultsFiles"))
+        {
             Directory.CreateDirectory(".\\ResultsFiles");
         }
 

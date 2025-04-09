@@ -102,7 +102,7 @@ namespace FlightData
             }
             else
             {
-                throw new Exception($"Could not Extract Data. {seperated.Count()} Comma seperated values read.");
+                throw new Exception($"Could not Extract Data. {seperated.Count()} Comma seperated values read. \n {dataString}");
             }
 
             return data;
