@@ -1,4 +1,3 @@
-﻿//--connection "192.0.123.37" -m "Hello from CommandLine"
 //SERVER
 using FlightData;
 using Microsoft.VisualBasic.FileIO;
@@ -94,7 +93,7 @@ public class TCPFlightConnection
                         double avgConsumption = fuelUsed / hours;
 
                         //write final avg to final
-                        string outputPath = $"flight_results_{currentClientID}.txt";
+                        string outputPath = $".\\ResultsFiles\\flight_results_{currentClientID}.txt";
                         using (StreamWriter writer = new StreamWriter(outputPath, append: true))
                         {
                             writer.WriteLine("------------------------------------------");
@@ -133,7 +132,7 @@ public class TCPFlightConnection
 
                                 Console.WriteLine($"Current Fuel Consumption for {currentClientID}: {currentRate:F4} gallons/hour \n");
                                 // Append partial average to file
-                                string outputPath = $"flight_results_{currentClientID}.txt";
+                                string outputPath = $".\\ResultsFiles\\flight_results_{currentClientID}.txt";
                                 using (StreamWriter writer = new StreamWriter(outputPath, append: true))
                                 {
                                     writer.WriteLine($"Partial Average @ {DateTime.Now}: {currentRate:F4} gallons/hour");
@@ -230,6 +229,13 @@ public class TCPFlightConnection
             //Initalize Needed Data Trackers.
             List<Thread> threads = new List<Thread>();
             Listener listener = new Listener(threads, true);
+
+        int ServerTimeOut = 5; //Measured in Minutes
+
+        //Prep Results File Directory
+        if (!Directory.Exists(".\\ResultsFiles")){
+            Directory.CreateDirectory(".\\ResultsFiles");
+        }
 
             //Start Listener
             Thread Listener = new Thread(listener.ListenerLogic);
