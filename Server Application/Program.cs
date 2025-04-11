@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
+
 public class TCPFlightConnection
 {
     public TcpClient handler { get; set; }
@@ -37,7 +38,7 @@ public class TCPFlightConnection
 
             //Initialize recieving byte buffer. 1 kb buffer
             var buffer = new byte[1_024];
-            var next = new byte[1] {1};
+            byte[] next = new byte[1] {1};
 
             bool keepStreaming = true;
 
@@ -78,7 +79,7 @@ public class TCPFlightConnection
 
                 if (endMessage == "end")
                 {
-                    Console.WriteLine("End of transmission");
+                    Console.WriteLine($"End of transmission: [{currentClientID}]");
                     keepStreaming = false;
 
                     //calculate and save final average consumption
@@ -151,7 +152,7 @@ public class TCPFlightConnection
                         {
                             // If less than 5 real-time minutes, just print the newly received data once if you want
                             // or skip printing altogether. For demonstration:
-                            Console.WriteLine($"[Received Telem for {currentClientID}] Fuel: {flightData.FuelLevel}, Time: {flightData.TimeStamp}");
+                            //Console.WriteLine($"[Received Telem for {currentClientID}] Fuel: {flightData.FuelLevel}, Time: {flightData.TimeStamp}");
                         }
 
                     }
@@ -218,8 +219,13 @@ public class TCPFlightConnection
             {
                 server.Dispose();
             }
+        catch (Exception alt)
+        {
+            Console.WriteLine($"Listener Encountered Error: {alt.Message}.");
+            server.Dispose();
         }
     }
+}
     public class Server
     {
         public static int Main()
@@ -230,7 +236,7 @@ public class TCPFlightConnection
             List<Thread> threads = new List<Thread>();
             Listener listener = new Listener(threads, true);
 
-        int ServerTimeOut = 5; //Measured in Minutes
+        int ServerTimeOut = 1; //Measured in Minutes
 
         //Prep Results File Directory
         if (!Directory.Exists(".\\ResultsFiles"))
@@ -245,8 +251,8 @@ public class TCPFlightConnection
 
             while (listener.flag)
             {
-                ////Measured in milliseconds, Sleeps for 1 minute
-                //Thread.Sleep(1000 * 10);
+            //Measured in milliseconds, Sleeps for 1 minute
+            Thread.Sleep(1000 * 120);
 
                 ////If all connections are Dead, no more messages are being recieved.
                 //if (threads.All(t => t.ThreadState == ThreadState.Stopped))

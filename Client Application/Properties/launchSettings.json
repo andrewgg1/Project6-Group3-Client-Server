@@ -2,7 +2,7 @@
   "profiles": {
     "Client Application": {
       "commandName": "Project",
-      "commandLineArgs": "--connection 127.0.0.1 -port 53000"
+      "commandLineArgs": "--connection 127.0.0.1 --port 53000"
     }
   }
 }

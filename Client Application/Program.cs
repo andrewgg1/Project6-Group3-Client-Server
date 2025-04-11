@@ -100,7 +100,7 @@ try
     Console.WriteLine($"Sent Client ID: {clientID}");
 
     byte[] buffer = new byte[1];
-
+    stream.Read(buffer, 0, 1);
     StreamReader? FileReader = File.OpenText($"{dataFilesDir}\\{dataFileName}");
 
     if(FileReader != null)
