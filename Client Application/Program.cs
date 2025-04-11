@@ -99,7 +99,8 @@ try
     await stream.WriteAsync(encodedClientID);
     Console.WriteLine($"Sent Client ID: {clientID}");
 
-
+    byte[] buffer = new byte[1];
+    stream.Read(buffer, 0, 1);
     StreamReader? FileReader = File.OpenText($"{dataFilesDir}\\{dataFileName}");
 
     if(FileReader != null)
@@ -116,12 +117,14 @@ try
 
 
             //call the extracted network stream and send a byte-encoded message.
-            await stream.WriteAsync(encodedMessage);
+            stream.Write(encodedMessage);
 
             Console.WriteLine($"Sent: {rawMessage}");
+
+            stream.Read(buffer, 0, 1);
             }
 
-            Thread.Sleep(1000); //Stop 1 second
+
         }
         //once EOF is reached
         string eofMessage = "end\n";
@@ -144,7 +147,7 @@ catch (Exception e)
 clientConnection.Close();
 clientConnection.Dispose();
 
-Console.WriteLine("\nClient Application Done.\nPress enter to Finish.");
-Console.ReadLine();
+//Console.WriteLine("\nClient Application Done.\nPress enter to Finish.");
+//Console.ReadLine();
 
 return 0;

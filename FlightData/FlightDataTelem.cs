@@ -9,7 +9,6 @@ namespace FlightData
     public class FlightDataTelem
     {
         //Not sure if you actually need it
-        public int? FlightID {  get; set; }
 
         public DateTime? TimeStamp { get; set; }
         
@@ -95,9 +94,15 @@ namespace FlightData
                 data.FuelLevel = fuel;
                 data.TimeStamp = flightDate;
             }
+            else if (seperated.Length == 1)
+            {
+                //The last message is blank.
+                data.FuelLevel = 0;
+                data.TimeStamp = DateTime.Now;
+            }
             else
             {
-                throw new Exception("Could not Extract Data");
+                throw new Exception($"Could not Extract Data. {seperated.Count()} Comma seperated values read. \n {dataString}");
             }
 
             return data;
