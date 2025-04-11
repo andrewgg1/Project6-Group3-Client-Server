@@ -208,11 +208,11 @@ public class Listener
                 //Create TcpObject
                 TCPFlightConnection connection = new TCPFlightConnection(connHandler);
 
-                    //Create a thread to run internal server logic and perform communications.
-                    Thread connThread = new Thread(connection.ServerLogic);
-                    connThread.Start();
-                    threads.Add(connThread);
-                }
+                //Create a thread to run internal server logic and perform communications.
+                Thread connThread = new Thread(connection.ServerLogic);
+                connThread.Start();
+                threads.Add(connThread);
+            }
 
             server.Dispose();
         }
@@ -239,11 +239,11 @@ public class Server
         
         int ServerTimeOut = 1; //Measured in Minutes
 
-        //Prep Results File Directory
-        if (!Directory.Exists(".\\ResultsFiles"))
-        {
-            Directory.CreateDirectory(".\\ResultsFiles");
-        }
+    //Prep Results File Directory
+    if (!Directory.Exists(".\\ResultsFiles"))
+    {
+        Directory.CreateDirectory(".\\ResultsFiles");
+    }
 
         //Start Listener
         Thread Listener = new Thread(listener.ListenerLogic);
